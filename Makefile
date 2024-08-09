@@ -10,4 +10,4 @@ execution_time_utils.o: execution_time_utils.c
 	$(CC) -c execution_time_utils.c -o execution_time_utils.o
 
 clean: 
-	rm –f execution_time_utils.o mergesort.o program
+	rm execution_time_utils.o mergesort.o program
