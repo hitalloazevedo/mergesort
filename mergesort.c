@@ -1,57 +1,77 @@
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
-#include "execution_time_utils.h"
+#include <string.h>
+#include <pthread.h>
+#include "libs/memory_allocation_utils.h"
+#include "libs/wr_operations.h"
+#include "libs/utils.h"
 
-void * thread_func(void * arg) {
-    printf("esta funcionando\n");
-}
+int main(int argc, char *argv[]){
+    int n_files = argc - 4;
+    int n_threads = atoi(argv[1]);
+    int * distribution = integer_vector_allocation(n_files);
 
-void * thread_func2(void * arg) {
-    for(int c = 0; c < 100000000; c++) {}
-    printf("esta funcionando\n");
-}
+    args_t * args = struct_args_allocation(n_threads);
 
-int main() {
+    tasks_distributor(n_files, n_threads, distribution);
 
-    int n_threads = 3; // quantidade de threads
+    pthread_t * threads = (pthread_t *) malloc(sizeof(pthread_t) * n_threads);
 
-    double * total_time_per_thread = (double *) malloc(sizeof(double) * n_threads); // alocando variável para guardar o tempo de execução total por thread
-    struct timeval * begin = (struct timeval *) malloc(sizeof(struct timeval) * n_threads); // alocando um vetor que servirá de parametro para obter o tempo de execução
-    struct timeval * end = (struct timeval *) malloc(sizeof(struct timeval) * n_threads); // alocando um vetor que servirá de parametro para obter o tempo de execução
+    char ** filesnames = string_vector_allocation(n_files, 30);
 
-    reset_total_time(total_time_per_thread, n_threads); // inicializando tempo total, para garantir que não haverá lixo
-    reset_time(begin, n_threads); // inicializando variáveis de parâmetros, para garantir que não haverá lixo
-    reset_time(end, n_threads); // inicializando variáveis de parâmetros, para garantir que não haverá lixo
- 
-    pthread_t * threads = malloc(sizeof(pthread_t) * n_threads); // alocando um vetor de threads dinâmicamente
-    int * response = (int *) malloc(sizeof(int) * n_threads); // alocando um vetor que irá receber o retorno das threads
-
-    int * arg;
-
-    for (int t = 0; t < n_threads; t++) { // for loop responsável por criar todas as threads
-        if (t == 1) {
-            response[t] = pthread_create(&threads[t], NULL, thread_func2, arg);
-        } else {
-            response[t] = pthread_create(&threads[t], NULL, thread_func, arg); // cria uma nova thread, recebe como
+    for (int i = 0; i < argc; i++){
+        if (i > 1 && i < argc - 2){
+            strcpy(filesnames[i - 2], argv[i]);
         }
     }
 
-    for (int t = 0; t < n_threads; t++) {
-        gettimeofday(&begin[t], NULL); // captura o tempo inicial
-        pthread_join(threads[t], NULL); // realiza o join de todas as threads
-        gettimeofday(&end[t], NULL); // captura o tempo final
+    // divisão das tarefas
+
+    printf("threads %d\n", n_threads);
+    int k = 0, j = 0;
+    for (int i = 0; i < n_threads; i++) {
+
+        printf("thread: %d tarefas: %d\n", i, distribution[i]);
+
+        args[i].filesnames = string_vector_allocation(distribution[i], 30);
+        args[i].n_files = distribution[i];
+
+        while (j < distribution[i]) {
+            strcpy(args[i].filesnames[j], filesnames[k]);
+            k++;
+            j++;
+        }
+        j = 0;
     }
 
-    compute_execution_time(total_time_per_thread, begin, end, n_threads);
-    show_execution_time_all_threads(total_time_per_thread, n_threads);
-    
-    free(total_time_per_thread);
-    free(response);
-    free(threads);
-    free(begin);
-    free(end);
 
-    exit(0);
+    for (int i = 0; i < n_threads; i++) {
+        if (distribution[i] > 0){
+            int tstatus = pthread_create(&threads[i], NULL, read, (void *)(&args[i]));
+            if (tstatus != 0) {
+                printf("Erro ao criar a thread\n");
+                exit(EXIT_FAILURE);
+            }
+        }
+    }
+
+
+    for (int i = 0; i < n_threads; i++) {
+        if (distribution[i] > 0){
+            int rstatus = pthread_join(threads[i], NULL);
+            if (rstatus) {
+                printf("Erro: pthread_join() returns %d\n", rstatus);
+                exit(EXIT_FAILURE);
+            }
+        }
+    }
+
+    integer_vector_deallocation(distribution);
+    for (int i = 0; i < n_threads; i++) {
+        string_vector_deallocation(args[i].filesnames, args[i].n_files);
+    }
+    // free(args);
+    string_vector_deallocation(filesnames, 30);
+
+    return 0;
 }

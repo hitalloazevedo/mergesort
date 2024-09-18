@@ -1,0 +1,1 @@
+void tasks_distributor(int tasks, int executors, int distribution[]);
