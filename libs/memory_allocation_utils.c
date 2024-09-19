@@ -3,12 +3,13 @@
 #include <stdio.h>
 // Structs
 
-args_t * struct_args_allocation(int n_args){
+args_t * vector_struct_args_allocation(int n_args){
     args_t * args = (args_t *) malloc(sizeof(args_t) * n_args);
     return args;
 }
 
 //Strings
+
 char * string_allocation(int string_length) {
     char * string = (char *) malloc(sizeof(char) * string_length);
     if (string == NULL){
@@ -42,6 +43,7 @@ void string_vector_deallocation(char ** string_vector, int vector_size){
 }
 
 // Integers
+
 int * integer_vector_allocation(int vector_size){
     int * vector = (int *) malloc(sizeof(int) * vector_size);
     return vector;
