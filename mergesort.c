@@ -7,23 +7,25 @@
 #include "libs/utils.h"
 
 int main(int argc, char *argv[]){
+
+    // Declaração de variáveis e alocação de memória
+
     int n_files = argc - 4;
     int n_threads = atoi(argv[1]);
     int * distribution = integer_vector_allocation(n_files);
+    long int * integers_quantity = (long int *)malloc(sizeof(long int));
 
-    args_t * args = struct_args_allocation(n_threads);
+    args_t * args = vector_struct_args_allocation(n_threads);
 
     tasks_distributor(n_files, n_threads, distribution);
 
     pthread_t * threads = (pthread_t *) malloc(sizeof(pthread_t) * n_threads);
 
-    char ** filesnames = string_vector_allocation(n_files, 30);
+    char ** filenames = string_vector_allocation(n_files, 30);
 
-    for (int i = 0; i < argc; i++){
-        if (i > 1 && i < argc - 2){
-            strcpy(filesnames[i - 2], argv[i]);
-        }
-    }
+    // Inicio das operações
+
+    extract_file_names_from_argv(filenames, argv, argc);
 
     // divisão das tarefas
 
@@ -33,11 +35,11 @@ int main(int argc, char *argv[]){
 
         printf("thread: %d tarefas: %d\n", i, distribution[i]);
 
-        args[i].filesnames = string_vector_allocation(distribution[i], 30);
+        args[i].filenames = string_vector_allocation(distribution[i], 30);
         args[i].n_files = distribution[i];
 
         while (j < distribution[i]) {
-            strcpy(args[i].filesnames[j], filesnames[k]);
+            strcpy(args[i].filenames[j], filenames[k]);
             k++;
             j++;
         }
@@ -56,22 +58,25 @@ int main(int argc, char *argv[]){
     }
 
 
-    for (int i = 0; i < n_threads; i++) {
+    for (int i = 0; i < n_threads; i++) { // para cada thread realizar o join
         if (distribution[i] > 0){
-            int rstatus = pthread_join(threads[i], NULL);
-            if (rstatus) {
+            int rstatus = pthread_join(threads[i], (void **)&integers_quantity); // realiza o join da thread e guarda quantos números a thread leu e escreveu
+            if (rstatus) { // se a thread retornar um valor maior que 0, um erro é mostrado
                 printf("Erro: pthread_join() returns %d\n", rstatus);
                 exit(EXIT_FAILURE);
             }
+            
+            integers_quantity = (long int *)integers_quantity; // Realiza a conversão do resultado da thread 
+            printf("A thread %d leu %ld inteiros\n", i, *integers_quantity);
         }
     }
 
-    integer_vector_deallocation(distribution);
-    for (int i = 0; i < n_threads; i++) {
-        string_vector_deallocation(args[i].filesnames, args[i].n_files);
+    // Desalocação de memória
+    integer_vector_deallocation(distribution); // desalocando o vetor de inteiros que guarda a distribuição das tarefas
+    for (int i = 0; i < n_threads; i++) { // desalocando o vetor de strings dentro da struct args
+        string_vector_deallocation(args[i].filenames, args[i].n_files);
     }
-    // free(args);
-    string_vector_deallocation(filesnames, 30);
+    string_vector_deallocation(filenames, 30); // desalocando o vetor de strings que guarda o nome dos arquivos de entrada
 
     return 0;
 }
