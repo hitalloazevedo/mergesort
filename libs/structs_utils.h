@@ -2,7 +2,7 @@
 #define STRUCT_UTILS_H
 
 typedef struct struct_args {
-    char ** filesnames;
+    char ** filenames;
     int n_files;
 } args_t;
 
