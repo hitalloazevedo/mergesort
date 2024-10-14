@@ -6,7 +6,7 @@
 
 pthread_mutex_t mutex;
 
-void write(char * output_file, int * content_vector, int content_size){
+void write_output_file(char * output_file, int * content_vector, int content_size){
     FILE * pfile;
 
     pfile = fopen(output_file, "a");
@@ -22,14 +22,13 @@ void write(char * output_file, int * content_vector, int content_size){
     fclose(pfile);
 }
 
-void * read(void * args){
+void * read_input_files(void * args){
     args_t inside_args = *(args_t *) args;
 
     long int * integers_quantity = (long int *)malloc(sizeof(long int));
     *integers_quantity = (long int)0;
 
-    // aloca uma matriz de tamanho linhas == N arquivos, e colunas até 1000 inteiros
-    int ** all_numbers = integer_matrix_allocation(inside_args.n_files, 100000);
+    int * numbers_vector = integer_vector_allocation(inside_args.n_files * 100000);
 
     // para cada arquivo atribuido faça
     for (int i = 0; i < inside_args.n_files; i++){
@@ -47,7 +46,7 @@ void * read(void * args){
         int rows = 0;
         while (fgets(line, 255, pfile) != NULL){
             // printf("%d\n", atoi(line));
-            all_numbers[i][rows] = atoi(line);
+            numbers_vector[(int)*integers_quantity] = atoi(line);
             rows++;
             *integers_quantity = *integers_quantity + (long int)1;
         }
@@ -56,11 +55,9 @@ void * read(void * args){
 
         fclose(pfile);
         pthread_mutex_lock(&mutex);
-        write("outputs/saida.dat", all_numbers[i], rows);
+        write_output_file("outputs/saida.dat", numbers_vector, (int)*integers_quantity);
         pthread_mutex_unlock(&mutex);
     }
-
-    integer_matrix_deallocation(all_numbers, inside_args.n_files);
 
     pthread_exit((void *)integers_quantity);
 }
