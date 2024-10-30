@@ -1,20 +1,35 @@
-CC=gcc
+# Nome do executável
+EXEC = mergesort
 
-mergesort: mergesort.o libs/memory_allocation_utils.o libs/wr_operations.o libs/utils.o
-	$(CC) mergesort.o libs/memory_allocation_utils.o libs/wr_operations.o libs/utils.o -o mergesort
+# Diretórios
+SRC_DIR = .
+LIB_DIR = ./libs
 
-mergesort.o: mergesort.c libs/memory_allocation_utils.o libs/wr_operations.o
-	$(CC) -c mergesort.c -o mergesort.o
+# Arquivos principais
+MAIN_SRC = $(SRC_DIR)/mergesort.c
 
-wr_operations.o: libs/wr_operations.c libs/memory_allocation_utils.o
-	$(CC) -c libs/wr_operations.c -o libs/wr_operations.o
+# Busca por todos os arquivos .c na pasta libs
+LIB_SRCS = $(wildcard $(LIB_DIR)/*.c)
 
-memory_allocation_utils.o: libs/memory_allocation_utils.c libs/memory_allocation_utils.h
-	$(CC) -c libs/memory_allocation_utils.c -o libs/memory_allocation_utils.o
+# Compilador e flags
+CC = gcc
+CFLAGS = -Wall -I$(LIB_DIR)
 
-utils.o: utils.c
-	$(CC) -c libs/utils.c -o utils.o
+# Geração dos objetos correspondentes
+OBJS = $(MAIN_SRC:.c=.o) $(LIB_SRCS:.c=.o)
 
+# Compilação
+$(EXEC): $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS)
 
-clean: 
-	rm libs/memory_allocation_utils.o mergesort.o libs/wr_operations.o
+# Regras para compilar os arquivos .c em .o
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Limpeza dos arquivos compilados
+clean:
+	rm -f $(EXEC) $(OBJS)
+
+# Para rodar o programa após compilado
+run: $(EXEC)
+	./$(EXEC)

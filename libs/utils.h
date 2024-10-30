@@ -1,3 +1,5 @@
+#include "structs_utils.h"
+
 // Para T threads e A arquivos, retorna um vetor com a distribuição das tarefas
 // int tasks: quantidade total de arquivos a serem lidos
 // int executors: quantidade de threads disponibilizadas
@@ -12,3 +14,9 @@ void tasks_distributor(int tasks, int executors, int distribution[]);
 // char ** argv: Vetor de strings com os argumentos do programa
 // int argc: quantidade de argumentos do vetor argv
 void extract_file_names_from_argv(char ** filenames, char ** argv, int argc);
+
+void fill_args_vector(int n_threads, int distribution[], char * filenames[], args_t args[]);
+
+void showVector(int * vet, int size);
+
+int countFileLines(char * filename);

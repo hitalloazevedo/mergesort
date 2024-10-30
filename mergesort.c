@@ -5,6 +5,15 @@
 #include "libs/memory_allocation_utils.h"
 #include "libs/wr_operations.h"
 #include "libs/utils.h"
+#include "classification.h"
+
+void * func(void * args){
+    r_args_t * arg = (r_args_t *)args;
+
+    mergesort(arg->vector, *arg->vector_size);
+
+    return (void *)NULL;
+}
 
 int main(int argc, char *argv[]){
 
@@ -13,9 +22,9 @@ int main(int argc, char *argv[]){
     int n_files = argc - 4;
     int n_threads = atoi(argv[1]);
     int * distribution = integer_vector_allocation(n_files);
-    long int * integers_quantity = (long int *)malloc(sizeof(long int));
 
     args_t * args = vector_struct_args_allocation(n_threads);
+    // r_args_t * result_vector = (r_args_t*)malloc(sizeof(r_args_t) * n_threads);
 
     tasks_distributor(n_files, n_threads, distribution);
 
@@ -23,52 +32,65 @@ int main(int argc, char *argv[]){
 
     char ** filenames = string_vector_allocation(n_files, 30);
 
-    // Inicio das operações
-
     extract_file_names_from_argv(filenames, argv, argc);
 
-    // divisão das tarefas
-
     printf("threads %d\n", n_threads);
-    int k = 0, j = 0;
-    for (int i = 0; i < n_threads; i++) {
-
-        printf("thread: %d tarefas: %d\n", i, distribution[i]);
-
-        args[i].filenames = string_vector_allocation(distribution[i], 30);
-        args[i].n_files = distribution[i];
-
-        while (j < distribution[i]) {
-            strcpy(args[i].filenames[j], filenames[k]);
-            k++;
-            j++;
-        }
-        j = 0;
-    }
+    fill_args_vector(n_threads, distribution, filenames, args);
 
 
+    r_args_t ** preSortedArrays = (r_args_t **)malloc(sizeof(r_args_t*) * n_threads); 
+
+
+    int sizeMergedArray = 0;
+    r_args_t * result = (r_args_t*)malloc(sizeof(r_args_t));
     for (int i = 0; i < n_threads; i++) {
         if (distribution[i] > 0){
-            int tstatus = pthread_create(&threads[i], NULL, read, (void *)(&args[i]));
-            if (tstatus != 0) {
+            int readThreadStatus = pthread_create(&threads[i], NULL, read_input_files, (void *)(&args[i]));
+            if (readThreadStatus != 0) {
                 printf("Erro ao criar a thread\n");
                 exit(EXIT_FAILURE);
             }
+
+
+            int responseReadThreadStatus = pthread_join(threads[i], (void **)&result); // realiza o join da thread e guarda quantos números a thread leu e escreveu
+            if (responseReadThreadStatus) { // se a thread retornar um valor maior que 0, um erro é mostrado
+                printf("Erro: pthread_join() returns %d\n", responseReadThreadStatus);
+                exit(EXIT_FAILURE);
+            }   
+
+            result = (r_args_t *)result;
+
+            int orderThreadStatus = pthread_create(&threads[i], NULL, func, (void *)(result));
+            if (orderThreadStatus != 0) {
+                printf("Erro ao criar a thread\n");
+                exit(EXIT_FAILURE);
+            }
+            int responseOrderThreadStatus = pthread_join(threads[i], NULL);
+            if (responseOrderThreadStatus) { // se a thread retornar um valor maior que 0, um erro é mostrado
+                printf("Erro: pthread_join() returns %d\n", responseOrderThreadStatus);
+                exit(EXIT_FAILURE);
+            }
+
+            sizeMergedArray += *result->vector_size;
+
+            preSortedArrays[i] = result;
         }
     }
 
+    int * mergedArray = (int *)malloc(sizeof(int) * sizeMergedArray);
 
-    for (int i = 0; i < n_threads; i++) { // para cada thread realizar o join
+    int pos = 0;
+    for (int i = 0; i < n_threads; i++){
         if (distribution[i] > 0){
-            int rstatus = pthread_join(threads[i], (void **)&integers_quantity); // realiza o join da thread e guarda quantos números a thread leu e escreveu
-            if (rstatus) { // se a thread retornar um valor maior que 0, um erro é mostrado
-                printf("Erro: pthread_join() returns %d\n", rstatus);
-                exit(EXIT_FAILURE);
-            }
-            
-            integers_quantity = (long int *)integers_quantity; // Realiza a conversão do resultado da thread 
-            printf("A thread %d leu %ld inteiros\n", i, *integers_quantity);
+            memcpy(mergedArray + pos, preSortedArrays[i]->vector, *preSortedArrays[i]->vector_size * sizeof(int));
+            pos += *preSortedArrays[i]->vector_size;
         }
+    }
+
+    mergesort(mergedArray, sizeMergedArray);
+
+    for (int i = 0; i < sizeMergedArray; i++){
+        printf("%d\n", mergedArray[i]);
     }
 
     // Desalocação de memória

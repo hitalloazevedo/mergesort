@@ -39,3 +39,24 @@ void fill_args_vector(int n_threads, int distribution[], char * filenames[], arg
         j = 0;
     }
 }
+
+void showVector(int * vet, int size){
+    for (int i = 0; i < size; i++){
+        printf("%d\n", vet[i]);
+    }
+}
+
+int countFileLines(char * filename){
+    FILE * file;
+    file = fopen(filename, "r");
+    int c = 0;
+    char ch;
+
+    while ((ch = getc(file)) != EOF){
+        if (ch == '\n'){ c++; }
+    }
+
+    fclose(file);
+
+    return c;
+}

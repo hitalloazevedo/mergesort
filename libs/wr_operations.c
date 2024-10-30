@@ -3,6 +3,8 @@
 #include "memory_allocation_utils.h"
 #include <string.h>
 #include <stdlib.h>
+#include "structs_utils.h"
+#include "utils.h"
 
 pthread_mutex_t mutex;
 
@@ -23,19 +25,28 @@ void write_output_file(char * output_file, int * content_vector, int content_siz
 }
 
 void * read_input_files(void * args){
+
     args_t inside_args = *(args_t *) args;
+    r_args_t * result = (r_args_t*)malloc(sizeof(r_args_t));
 
-    long int * integers_quantity = (long int *)malloc(sizeof(long int));
-    *integers_quantity = (long int)0;
+    int * integers_quantity = (int *)malloc(sizeof(int));
+    *integers_quantity = 0;
+    for (int i = 0; i < inside_args.n_files; i++){
+        char * file_path = string_allocation(200);
+        strcpy(file_path, "inputs/");
+        strcat(file_path, inside_args.filenames[i]);
+        *integers_quantity += countFileLines(file_path);
+        free(file_path);
+    }
 
-    int * numbers_vector = integer_vector_allocation(inside_args.n_files * 100000);
+    int * numbers_vector = integer_vector_allocation(inside_args.n_files * (*integers_quantity));
 
     // para cada arquivo atribuido faça
+
+    int j = 0;
     for (int i = 0; i < inside_args.n_files; i++){
         FILE * pfile; // cria um ponteiro para arquivos
-
         char * file_path = string_allocation(200);
-
         strcpy(file_path, "inputs/");
         strcat(file_path, inside_args.filenames[i]);
 
@@ -43,21 +54,16 @@ void * read_input_files(void * args){
 
         pfile = fopen(file_path, "r");
         string_deallocation(file_path);
-        int rows = 0;
         while (fgets(line, 255, pfile) != NULL){
-            // printf("%d\n", atoi(line));
-            numbers_vector[(int)*integers_quantity] = atoi(line);
-            rows++;
-            *integers_quantity = *integers_quantity + (long int)1;
+            numbers_vector[j] = atoi(line);
+            j++;
         }
-
         string_deallocation(line);
-
         fclose(pfile);
-        pthread_mutex_lock(&mutex);
-        write_output_file("outputs/saida.dat", numbers_vector, (int)*integers_quantity);
-        pthread_mutex_unlock(&mutex);
     }
 
-    pthread_exit((void *)integers_quantity);
+    result->vector = numbers_vector;
+    result->vector_size = integers_quantity;
+
+    pthread_exit((void *)result);
 }

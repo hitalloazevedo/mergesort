@@ -46,6 +46,10 @@ void string_vector_deallocation(char ** string_vector, int vector_size){
 
 int * integer_vector_allocation(int vector_size){
     int * vector = (int *) malloc(sizeof(int) * vector_size);
+    if (vector == NULL){
+        perror("Erro ao alocar vetor\n");
+        exit(EXIT_FAILURE);
+    }
     return vector;
 }
 
