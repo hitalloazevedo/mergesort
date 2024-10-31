@@ -22,7 +22,7 @@ int main(int argc, char *argv[]){
 
     // =========================================================================================
     // Aloca um vetor de distribuição de quantos arquivos cada thread irá ler
-    int * distribution = integer_vector_allocation(n_files);
+    int * distribution = integer_vector_allocation(n_threads);
     // Popula o vetor de distribuição
     tasks_distributor(n_files, n_threads, distribution);
     // =========================================================================================
@@ -67,8 +67,6 @@ int main(int argc, char *argv[]){
     // corresponde a quantidade total de inteiros que o programa irá processar
     int unifiedVectorSize = 0;
     // =========================================================================================
-
-
 
     // =========================================================================================
     // Aloca o vetor de threads que o programa irá utilizar
@@ -235,6 +233,15 @@ int main(int argc, char *argv[]){
         string_vector_deallocation(args[i].filenames, args[i].n_files);
     }
     free(args);
+
+    // Outras desalocações de memória
+    for (int i = 0; i < n_threads; i++){
+        free(unordered_vectors[i]->array);
+    }
+    free(unordered_vectors);
+    free(ordened_vectors);
+    free(result);
+    free(threads);
     // =========================================================================================
 
     return 0;
