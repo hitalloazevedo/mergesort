@@ -1,10 +1,14 @@
-#include "structs_utils.h"
+#include "types.h"
 
 // Structs
 
 // aloca um vetor de struct args de tamanho N
-// int n_args: Quantidade de struct args no vetor
-args_t * vector_struct_args_allocation(int n_args);
+// int n_threads: Quantidade de struct args no vetor
+t_read_args * vector_struct_read_args_allocation(int n_threads);
+
+// aloca um vetor de ponteiros de struct de tamanho N
+// int n_threads: Quantidade de ponteiros de struct args retorno no vetor
+t_read_args_return ** pointer_vector_read_args_return_allocation(int n_threads);
 
 // Strings
 
@@ -45,3 +49,7 @@ void integer_matrix_deallocation(int ** matrix, int rows);
 // Desaloca um vetor de inteiros
 // int * vector: endereço de memória do vetor
 void integer_vector_deallocation(int * vector);
+
+double ** double_pointer_vector_allocation(int vector_size);
+
+void double_pointer_vector_deallocation(double ** vector, int vector_size);

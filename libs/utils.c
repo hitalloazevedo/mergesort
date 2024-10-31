@@ -1,6 +1,6 @@
 #include "utils.h"
 #include <string.h>
-#include "memory_allocation_utils.h"
+#include "memory_utils.h"
 #include <stdio.h>
 
 void tasks_distributor(int tasks, int executors, int distribution[]) {
@@ -25,7 +25,7 @@ void extract_file_names_from_argv(char ** filesnames, char ** argv, int argc){
     }
 }
 
-void fill_args_vector(int n_threads, int distribution[], char * filenames[], args_t args[]){
+void fill_args_vector(int n_threads, int distribution[], char * filenames[], t_read_args args[]){
     int k = 0, j = 0;
     for (int i = 0; i < n_threads; i++) {
         args[i].filenames = string_vector_allocation(distribution[i], 30);
@@ -40,8 +40,8 @@ void fill_args_vector(int n_threads, int distribution[], char * filenames[], arg
     }
 }
 
-void showVector(int * vet, int size){
-    for (int i = 0; i < size; i++){
+void showVector(int * vet, int array_size){
+    for (int i = 0; i < array_size; i++){
         printf("%d\n", vet[i]);
     }
 }
@@ -59,4 +59,22 @@ int countFileLines(char * filename){
     fclose(file);
 
     return c;
+}
+
+void merge_unordened_vectors(int mergedVectorSize, int n_threads, t_read_args_return ** unordened_vector, int * mergedVector, int * distribution){
+    int pos = 0;
+    for (int i = 0; i < n_threads; i++){
+        if (distribution[i] > 0){
+            memcpy(mergedVector + pos, unordened_vector[i]->array, *unordened_vector[i]->array_size * sizeof(int));
+            pos += *unordened_vector[i]->array_size;
+        }
+    }
+}
+
+void merge_pre_ordened_vectors(int mergedVectorSize, int n_threads, t_sort_args * ordened_arrays, int * mergedVector){
+    int pos = 0;
+    for (int i = 0; i < n_threads; i++){
+        memcpy(mergedVector + pos, ordened_arrays[i].array, ordened_arrays[i].array_size * sizeof(int));
+        pos += ordened_arrays[i].array_size;
+    }
 }
