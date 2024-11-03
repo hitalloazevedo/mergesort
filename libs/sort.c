@@ -11,7 +11,6 @@
 void * sortVector(void * args){
     // criação das variáveis responsáveis em armazenar os dados do tempo de execução
     struct timespec begin, end;
-    double * totalTime = (double *)malloc(sizeof(double));
 
     // Realiza o cast do argumento da função
     t_sort_args * arg = (t_sort_args *)args;
@@ -24,11 +23,11 @@ void * sortVector(void * args){
     clock_gettime(CLOCK_MONOTONIC, &end);
 
     // calcula os tempo de execução da thread
-    *totalTime = (end.tv_sec - begin.tv_sec);
-    *totalTime += (end.tv_nsec - begin.tv_nsec) / 10e9;
+    arg->execution_time = (end.tv_sec - begin.tv_sec);
+    arg->execution_time += (end.tv_nsec - begin.tv_nsec) / 10e9;
 
     // Finaliza a execução da thread retornando o tempo de execução
-    pthread_exit((void*)totalTime);
+    return 0;
 }
 
 // ==============================================================================================
@@ -89,3 +88,40 @@ void merge(int *v, int *c, int i, int m, int f) {
   while (ic <= f) v[z++] = c[ic++];
 }
 // ==============================================================================================
+
+void sort_intermediate_vectors(pthread_t* threads, int n_threads, int unifiedVectorSize, int * mergedArray, t_sort_args * ordened_vectors,struct timespec * begin_time, struct timespec * end_time){
+
+    // =========================================================================================
+    // Definição de variáveis importantes para realizar a divisão do vetor unificado não ordenado
+    // Em N vetores intermediários, sendo N == n_threads
+    // =========================================================================================
+    int segment_size = unifiedVectorSize / n_threads;
+    int remainder = unifiedVectorSize % n_threads;
+    int start_index = 0;
+
+    clock_gettime(CLOCK_MONOTONIC, begin_time);
+    for (int i = 0; i < n_threads; i++){
+        // Separa o vetor unificado em n_threads partes iguais, ou o mais balanceado possível
+        ordened_vectors[i].array_size = segment_size + (i < remainder ? 1 : 0);
+        ordened_vectors[i].array = &mergedArray[start_index];
+        start_index += ordened_vectors[i].array_size;
+        // Cria uma nova thread passando como parâmetros:
+        // A função de ordenação (sortVector) e um vetor para ser ordenado;
+        int sort_thread_status = pthread_create(&threads[i], NULL, sortVector, (void *)&ordened_vectors[i]);
+        // Verifica se a thread foi instanciada com sucesso
+        if (sort_thread_status != 0) {
+            perror("Erro ao criar a thread\n");
+            exit(EXIT_FAILURE);
+        }
+        // Aguarda o fim da execução da thread, recebendo um retorno
+        // O retorno é um ponteiro de double que aponta para tempo de execução dentro da thread
+        int response_sort_thread_status = pthread_join(threads[i], NULL);
+        // Verifica se o join foi realizado com êxito
+        if (response_sort_thread_status) { 
+            printf("Erro: pthread_join() returns %d\n", response_sort_thread_status);
+            exit(EXIT_FAILURE);
+        }   
+    }
+    // Guarda o momento de tempo atual na variável end_time
+    clock_gettime(CLOCK_MONOTONIC, end_time);
+}

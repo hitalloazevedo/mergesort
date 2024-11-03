@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <pthread.h>
-#include "memory_utils.h"
 #include <string.h>
 #include <stdlib.h>
 #include "types.h"
@@ -20,44 +19,65 @@ void write_output_file(char * output_file, int * content_vector, int content_siz
 
 void * read_input_files(void * args){
 
-    t_read_args inside_args = *(t_read_args *) args;
-    t_read_args_return * result = (t_read_args_return*)malloc(sizeof(t_read_args_return));
+    t_read_args * inside_args = (t_read_args *) args;
 
-    int * integers_quantity = (int *)malloc(sizeof(int));
-    *integers_quantity = 0;
-    for (int i = 0; i < inside_args.n_files; i++){
-        char * file_path = string_allocation(200);
+    int integers_quantity = 0;
+    for (int i = 0; i < inside_args->n_files; i++){
+        char * file_path = (char *)malloc(sizeof(char) * 200);
         strcpy(file_path, "inputs/");
-        strcat(file_path, inside_args.filenames[i]);
-        *integers_quantity += countFileLines(file_path);
+        strcat(file_path, inside_args->filenames[i]);
+        integers_quantity += countFileLines(file_path);
         free(file_path);
     }
 
-    int * numbers_vector = integer_vector_allocation(inside_args.n_files * (*integers_quantity));
+    inside_args->vector = (int *)malloc(sizeof(int) * integers_quantity);
+    inside_args->vector_size = integers_quantity;
 
     // para cada arquivo atribuido faça
 
     int j = 0;
-    for (int i = 0; i < inside_args.n_files; i++){
+    for (int i = 0; i < inside_args->n_files; i++){
         FILE * pfile; // cria um ponteiro para arquivos
-        char * file_path = string_allocation(200);
+        char * file_path = (char *)malloc(sizeof(char) * 200);
         strcpy(file_path, "inputs/");
-        strcat(file_path, inside_args.filenames[i]);
+        strcat(file_path, inside_args->filenames[i]);
 
-        char * line = string_allocation(255);
+        char * line = (char *)malloc(sizeof(char) * 20);
 
         pfile = fopen(file_path, "r");
-        string_deallocation(file_path);
-        while (fgets(line, 255, pfile) != NULL){
-            numbers_vector[j] = atoi(line);
+        free(file_path);
+        while (fgets(line, 20, pfile) != NULL){
+            inside_args->vector[j] = atoi(line);
             j++;
         }
-        string_deallocation(line);
+        free(line);
         fclose(pfile);
     }
 
-    result->array = numbers_vector;
-    result->array_size = integers_quantity;
+    return 0;
+}
 
-    pthread_exit((void *)result);
+void handle_read_files(pthread_t * threads, int n_threads, int * distribution, int * unifiedVectorSize, t_read_args * args){
+    for (int i = 0; i < n_threads; i++) {
+        // Seguindo a distruição de arquivos para threads
+        if (distribution[i] > 0){
+            // Cria uma thread passando como parâmetro a função de leitura dos arquivos e uma struct de argumentos
+            // A struct contém um vetor com os nomes dos arquivos que serão lidos e a quantidade de arquivos do vetor
+            int read_thread_status = pthread_create(&threads[i], NULL, read_input_files, (void *)(&args[i]));
+            // verifica se a thread foi criada com sucesso
+            if (read_thread_status != 0) {
+                perror("Erro ao criar a thread\n");
+                exit(EXIT_FAILURE);
+            }
+            // aguarda a finalização da execução das threads
+            int response_read_thread_status = pthread_join(threads[i], NULL); 
+            // verifica se o join foi realizado com êxito
+            if (response_read_thread_status) { 
+                printf("Erro: pthread_join() returns %d\n", response_read_thread_status);
+                exit(EXIT_FAILURE);
+            }  
+            // Incrementa o tamanho do vetor unificado com os tamanhos dos vetores intermediários
+            *unifiedVectorSize += args[i].vector_size;
+        }
+    }
 }
