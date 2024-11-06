@@ -28,8 +28,4 @@ $(EXEC): $(OBJS)
 
 # Limpeza dos arquivos compilados
 clean:
-	rm -f $(EXEC) $(OBJS)
-
-# Para rodar o programa após compilado
-run: $(EXEC)
-	./$(EXEC)
+	rm -f $(OBJS)
