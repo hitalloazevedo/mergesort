@@ -31,18 +31,19 @@ void fill_args_vector(int n_threads, int distribution[], char * filenames[], t_r
         args[i].filenames = string_vector_allocation(distribution[i], 30);
         args[i].n_files = distribution[i];
 
+        // popula o vetor de argumentos respeitando a distribuição dos arquivos
+        // se o vetor de distribuição for [1, 1, 1, 0]
+        // Então os argumentos serão
+        // args[0].filenames = {"arq1.dat"}
+        // args[1].filenames = {"arq1.dat"}
+        // args[2].filenames = {"arq1.dat"}
+        // args[3].filenames = {}
         while (j < distribution[i]) {
             strcpy(args[i].filenames[j], filenames[k]);
             k++;
             j++;
         }
         j = 0;
-    }
-}
-
-void showVector(int * vet, int array_size){
-    for (int i = 0; i < array_size; i++){
-        printf("%d\n", vet[i]);
     }
 }
 

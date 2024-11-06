@@ -22,6 +22,8 @@ void * read_input_files(void * args){
     t_read_args * inside_args = (t_read_args *) args;
 
     int integers_quantity = 0;
+
+    // Conta a quantidade de linhas no arquivo
     for (int i = 0; i < inside_args->n_files; i++){
         char * file_path = (char *)malloc(sizeof(char) * 200);
         strcpy(file_path, "inputs/");
@@ -33,8 +35,7 @@ void * read_input_files(void * args){
     inside_args->vector = (int *)malloc(sizeof(int) * integers_quantity);
     inside_args->vector_size = integers_quantity;
 
-    // para cada arquivo atribuido faça
-
+    // Realiza a leitura e armazena no vetor de resultado
     int j = 0;
     for (int i = 0; i < inside_args->n_files; i++){
         FILE * pfile; // cria um ponteiro para arquivos

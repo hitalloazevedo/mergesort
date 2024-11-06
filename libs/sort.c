@@ -87,8 +87,8 @@ void merge(int *v, int *c, int i, int m, int f) {
 
   while (ic <= f) v[z++] = c[ic++];
 }
-// ==============================================================================================
 
+// ==============================================================================================
 void sort_intermediate_vectors(pthread_t* threads, int n_threads, int unifiedVectorSize, int * mergedArray, t_sort_args * ordened_vectors,struct timespec * begin_time, struct timespec * end_time){
 
     // =========================================================================================
