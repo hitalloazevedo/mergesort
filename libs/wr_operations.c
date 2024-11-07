@@ -4,14 +4,44 @@
 #include <stdlib.h>
 #include "types.h"
 #include "utils.h"
+#include <limits.h>
 
-void write_output_file(char * output_file, int * content_vector, int content_size){
+void write_output_file(char * output_file, int n_threads, t_sort_args * ordened_vectors){
     FILE * pfile;
 
     pfile = fopen(output_file, "w+");
 
-    for (int i = 0; i < content_size; i++){
-        fprintf(pfile, "%d\n", content_vector[i]);
+    // cria um vetor de tamanho n_threads de indexes que corresponde ao index dos vetores, sendo (index) < (tamanho do vetor)
+    int indexes[n_threads];
+    for (int i = 0; i < n_threads; i++){
+        indexes[i] = 0;
+    }
+
+    while (1){
+        int min_value = INT_MAX;
+        int min_index = -1;
+
+        for (int i = 0; i < n_threads; i++){
+            // se o index for menor que tamanho do vetor
+            if (indexes[i] < ordened_vectors[i].array_size){
+                // o atual recebe o valor do vetor na posição do index
+                int current = ordened_vectors[i].array[indexes[i]];
+                // comparação para descobrir o menor valor entre os N vetores
+                if (current < min_value){
+                    min_value = current;
+                    min_index = i;
+                }
+            }
+        }
+
+        if (min_index == -1){
+            break;
+        }
+
+        // Escreve o menor valor no arquivo de saída
+        fprintf(pfile, "%d\n", min_value);
+
+        indexes[min_index]++;
     }
     
     fclose(pfile);

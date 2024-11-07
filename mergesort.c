@@ -52,17 +52,11 @@ int main(int argc, char *argv[]){
     // Ordenação dos vetores intermediarios
     sort_intermediate_vectors(threads, n_threads, unifiedVectorSize, mergedArray, ordened_vectors, &begin_time, &end_time);
 
-    // Aloca um vetor de inteiros que armazenará os inteiros ordenados
-    int * mergedOrdenedArray = (int*)malloc(sizeof(int) * unifiedVectorSize);
-    merge_pre_ordened_vectors(unifiedVectorSize, n_threads, ordened_vectors, mergedOrdenedArray);
-    // Realiza a ordenação do vetor unificado com o algoritmo mergesort
-    mergesort(mergedOrdenedArray, unifiedVectorSize);
-
-    // Realiza a escrita dos resultados no arquivo de saida
-    char * output_path = (char *)malloc(sizeof(char) * 50);
+    // Escreve os vetores ordenados no arquivo de saida
+    char * output_path = (char *)malloc(sizeof(char) * 30);
     strcpy(output_path, "outputs/");
     strcat(output_path, argv[argc - 1]);
-    write_output_file(output_path, mergedOrdenedArray, unifiedVectorSize);
+    write_output_file(output_path, n_threads, ordened_vectors);
 
     // Imprime no terminal todas as informações sobres os tempos de execução
     show_time_specs(n_threads, begin_time, end_time, ordened_vectors);
@@ -85,6 +79,5 @@ int main(int argc, char *argv[]){
     free(distribution);
     free(ordened_vectors);
     free(mergedArray);
-    free(mergedOrdenedArray);
     return 0;
 }

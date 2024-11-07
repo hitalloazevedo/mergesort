@@ -3,7 +3,7 @@
 #include "types.h"
 
 // Escreve o vetor no arquivo de saída
-void write_output_file(char * output_file, int * content_vector, int content_size);
+void write_output_file(char * output_file, int n_threads, t_sort_args * ordened_vectors);
 
 // Realiza a leitura dos arquivos de entrada, função de argumento da trhead
 void * read_input_files(void * args);
