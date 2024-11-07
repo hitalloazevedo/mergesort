@@ -26,7 +26,4 @@ void showVector(int * vet, int size);
 int countFileLines(char * filename);
 
 // Realiza o merge dos vetores não ordenados que são gerados após a leitura dos arquivos
-void merge_unordened_vectors(int mergedVectorSize, int n_threads, t_read_args * args, int * mergedVector, int * distribution);
-
-// Realiza o merge dos vetores pré ordenados em um único vetor pré ordenado
-void merge_pre_ordened_vectors(int mergedVectorSize, int n_threads, t_sort_args * ordened_arrays, int * mergedVector);
+void merge_vectors(int mergedVectorSize, int n_threads, t_read_args * args, int * mergedVector, int * distribution);

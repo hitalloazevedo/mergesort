@@ -43,7 +43,7 @@ int main(int argc, char *argv[]){
     // Aloca um vetor que irá armazenar os inteiros não ordenados
     int * mergedArray = (int*)malloc(sizeof(int) * unifiedVectorSize);
     // Unificando os vetores não ordenados resultantes da leitura em um único vetor não ordenado
-    merge_unordened_vectors(unifiedVectorSize, n_threads, args, mergedArray, distribution);
+    merge_vectors(unifiedVectorSize, n_threads, args, mergedArray, distribution);
 
     // Aloca memória e instancia variáveis para armazenar dados dos tempos de execução
     struct timespec begin_time, end_time;

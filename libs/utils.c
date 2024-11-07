@@ -67,7 +67,7 @@ int countFileLines(char * filename){
     return c;
 }
 
-void merge_unordened_vectors(int mergedVectorSize, int n_threads, t_read_args * args, int * mergedVector, int * distribution){
+void merge_vectors(int mergedVectorSize, int n_threads, t_read_args * args, int * mergedVector, int * distribution){
     int pos = 0;
     for (int i = 0; i < n_threads; i++){
         if (distribution[i] > 0){
@@ -75,12 +75,4 @@ void merge_unordened_vectors(int mergedVectorSize, int n_threads, t_read_args * 
             pos += args[i].vector_size;
         }
     }
-}
-
-void merge_pre_ordened_vectors(int mergedVectorSize, int n_threads, t_sort_args * ordened_arrays, int * mergedVector){
-    int pos = 0;
-    for (int i = 0; i < n_threads; i++){
-        memcpy(mergedVector + pos, ordened_arrays[i].array, ordened_arrays[i].array_size * sizeof(int));
-        pos += ordened_arrays[i].array_size;
-    }   
 }
