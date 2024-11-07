@@ -1,1 +1,4 @@
 .vscode
+/libs/*.o
+*.o
+mergesort
