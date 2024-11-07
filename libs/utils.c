@@ -2,6 +2,7 @@
 #include <string.h>
 #include "memory_utils.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 void tasks_distributor(int tasks, int executors, int distribution[]) {
     int q = tasks / executors;  // Calcula o quociente
@@ -50,6 +51,10 @@ void fill_args_vector(int n_threads, int distribution[], char * filenames[], t_r
 int countFileLines(char * filename){
     FILE * file;
     file = fopen(filename, "r");
+    if (file == NULL){
+        printf("erro: erro ao abrir o arquivo de para contar linhas\n");
+        exit(EXIT_FAILURE);
+    }
     int c = 0;
     char ch;
 

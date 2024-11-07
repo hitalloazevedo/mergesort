@@ -5,11 +5,16 @@
 #include "types.h"
 #include "utils.h"
 #include <limits.h>
+#include <time.h>
 
 void write_output_file(char * output_file, int n_threads, t_sort_args * ordened_vectors){
     FILE * pfile;
 
     pfile = fopen(output_file, "w+");
+    if (pfile == NULL){
+        printf("erro: erro ao abrir o arquivo de saída\n");
+        exit(EXIT_FAILURE);
+    }
 
     // cria um vetor de tamanho n_threads de indexes que corresponde ao index dos vetores, sendo (index) < (tamanho do vetor)
     int indexes[n_threads];
@@ -76,6 +81,11 @@ void * read_input_files(void * args){
         char * line = (char *)malloc(sizeof(char) * 20);
 
         pfile = fopen(file_path, "r");
+        if (pfile == NULL){
+            printf("erro: erro ao abrir o arquivo para leitura\n");
+            exit(EXIT_FAILURE);
+        }
+        
         free(file_path);
         while (fgets(line, 20, pfile) != NULL){
             inside_args->vector[j] = atoi(line);
