@@ -1,4 +1,5 @@
 # Mergesort
+![image](https://img.shields.io/badge/Programming-brightgreen?style=plastic&logo=c%2B%2B)
 
 Trabalho prático desenvolvido para a disciplina de Sistemas Operacionais - TT304, da Faculdade de Tecnologia da Unicamp.
 
@@ -45,3 +46,58 @@ Executando o programa
 #### Configurações essenciais para uma execução correta
 Os arquivos de entrada com os valores inteiros devem estar localizados em `/mergesort/inputs`. <br>
 É recomendado que as extensões dos arquivos de entrada e saída sejam `.dat` ou `.txt`.
+
+## Experimentos
+#### Configuração das amostras de teste
+- 5 arquivos
+- 1000 inteiros ordenados de forma decrescente
+#### Configuração dos casos de teste
+- 1 thread
+- 2 threads
+- 4 threads
+- 8 threads
+
+Cada teste utilizou a amostra pré definida e diferentes quantidades de threads. Para cada quantidade de thread foi realizada 5 execuções, com os tempos de execução foi calculada a média aritmética.
+
+#### Executando os casos de teste
+Testes com 1 thread
+
+`./casodeteste1.sh` ou `bash casodeteste1.sh`
+
+Testes com 2 threads
+
+`./casodeteste2.sh` ou `bash casodeteste2.sh`
+
+Testes com 4 threads
+
+`./casodeteste3.sh` ou `bash casodeteste3.sh`
+
+Testes com 5 threads
+
+`./casodeteste4.sh` ou `bash casodeteste4.sh`
+
+## Resultados
+
+1 thread
+|Thread 1|Tempo Total|
+| -       | -        |
+| 60     | 75        |
+
+2 threads
+|Thread 1|Thread 2|Tempo total|
+| -       | -        | -|
+| 33     | 33        | 106 |
+
+4 threads
+|Thread 1|Thread 2|Thread 3|Thread 4| Tempo total |
+| -       | -        | -|-|-|
+| 14     | 16        |13| 14|107|
+
+8 threads
+|Thread 1|Thread 2|Thread 3|Thread 4|Thread 5|Thread 6|Thread 7|Thread 8| Tempo total |
+| -       | -        | -|-|-|-|-|-|-|
+| 7     | 8        |8    |   8        |   9        |        8 |    8       |     8        | 130 |
+
+## Resultados
+Esses resultados indicam que, embora o uso de múltiplas threads tenha permitido a execução paralela de tarefas, o tempo total não diminuiu proporcionalmente com o aumento no número de threads. A configuração com 1 thread apresentou o menor tempo total, enquanto o uso de 8 threads resultou em um tempo total mais elevado.
+Esses dados mostram que a sobrecarga de gerenciamento de múltiplas threads aumenta com o número de threads, o que, em alguns casos, pode anular os ganhos de paralelismo. Isso sugere que, para tarefas de I/O e processamento leve, um número menor de threads pode oferecer um desempenho mais eficiente.
