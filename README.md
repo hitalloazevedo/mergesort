@@ -79,6 +79,7 @@ Testes com 5 threads
 `./casodeteste4.sh` ou `bash casodeteste4.sh`
 
 ## Resultados
+Os tempos de execução estão numa escala de microssegundos. (1 microssegundo == 10⁻⁶ segundo)
 
 1 thread
 |Thread 1|Tempo Total|
