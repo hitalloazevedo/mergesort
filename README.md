@@ -9,6 +9,8 @@ Discentes: Hitallo Alves Teles Azevedo e João Pedro Calsavara
 
 Docente: André Leon S. Gradvohl
 
+<a target="_blank" href="https://youtu.be/-b-9yzjy3Eg">Vídeo explicando o projeto detalhadamente</a>
+
 ## Descrição do problema
 Este programa em C processa múltiplos arquivos de entrada, cada um contendo uma lista de inteiros desordenados (um em cada linha), utilizando threads. Ele realiza a leitura e ordenação simultânea dos arquivos, armazenando o resultado em um arquivo de saída. A implementação visa medir o impacto do aumento de threads no tempo de execução. 
 
