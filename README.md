@@ -35,7 +35,7 @@ make
 
 Executando o programa
 ```
-./mergesort <T> <F1> <F2> <F3> -o <OF>
+./main <T> <F1> <F2> <F3> -o <OF>
 ```
 ##### Argumentos
 \<T\>: quantidade de threads que o programa irá utilizar. <br>
