@@ -17,6 +17,7 @@ t_reader_thread_task * tasks_distributor_for_reader_threads(int threads_count, i
 
 
 // Imprime um vetor no terminal
+void print_with_dots(long long n);
 void print_array(int * array, size_t size);
 
 // Realiza o merge dos vetores não ordenados que são gerados após a leitura dos arquivos

@@ -62,27 +62,39 @@ void print_array(int * array, size_t size){
 }
 
 void show_execution_details(size_t threads_count, t_sort_outcome * sort_result){
-    double threads_total_time = 0.0;
-    int integers_processed = 0;
+    long long integers_processed = 0;
     for (size_t i = 0; i < threads_count; i++){
-        threads_total_time += sort_result->threads_outcome[i].execution_time;
         integers_processed += sort_result->threads_outcome[i].intermediate_array->size;
     }
     printf("======== Results =========\n");
 
-    printf("Total of integers processed: %d\n", integers_processed);
+    printf("Total of integers processed: ");
+    print_with_dots(integers_processed);
 
     char *group_time_str = format_time_auto(sort_result->execution_time);
     printf("Threads group time (create until join): %s\n", group_time_str);
     free(group_time_str);
 
-    char *total_sort_time_str = format_time_auto(threads_total_time);
-    printf("Threads total time to sort: %s\n", total_sort_time_str);
-    free(total_sort_time_str);
-
     for (size_t i = 0; i < threads_count; i++){
         char *thread_time_str = format_time_auto(sort_result->threads_outcome[i].execution_time);
-        printf("Thread (%ld): %s\n", i + 1, thread_time_str);
+        printf("  - Thread (%ld) took %s to sort %ld integers.\n", i + 1, thread_time_str, sort_result->threads_outcome[i].intermediate_array->size);
         free(thread_time_str);
     }
+}
+
+void print_with_dots(long long n) {
+    char buffer[32];
+    sprintf(buffer, "%lld", n);
+
+    int len = strlen(buffer);
+    int first_group = len % 3;
+    if (first_group == 0) first_group = 3;
+
+    for (int i = 0; i < len; i++) {
+        if (i != 0 && (i - first_group) % 3 == 0) {
+            putchar('.');
+        }
+        putchar(buffer[i]);
+    }
+    putchar('\n');
 }
