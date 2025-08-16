@@ -1,78 +1,88 @@
 #include "utils.h"
 #include <string.h>
-#include "memory_utils.h"
+#include "malloc_utils.h"
+#include "types.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "time_utils.h"
+#include <string.h>
 
-void tasks_distributor(int tasks, int executors, int distribution[]) {
-    int q = tasks / executors;  // Calcula o quociente
-    int r = tasks % executors;  // Calcula o resto
+t_reader_thread_task * tasks_distributor_for_reader_threads(int threads_count, int files_count, char **filenames) {
+    // Aloca a lista de tarefas
+    t_reader_thread_task *tasks = (t_reader_thread_task*)malloc(threads_count * sizeof(t_reader_thread_task));
+    check_malloc(tasks, "error to alocate memory to read tasks.");
 
-    // Distribui as tarefas
-    for (int i = 0; i < executors; i++) {
-        if (i < r) {
-            distribution[i] = q + 1;  // Os primeiros 'r' executores recebem uma tarefa extra
-        } else {
-            distribution[i] = q;  // Os restantes recebem 'q' tarefas
+    int q = files_count / threads_count; // quantidade base por thread
+    int r = files_count % threads_count; // threads que recebem 1 extra
+
+    int file_index = 0; // índice global dos arquivos
+
+    for (int i = 0; i < threads_count; i++) {
+        int num_files = (i < r) ? q + 1 : q;
+
+        tasks[i].count = num_files;
+        tasks[i].files = malloc(num_files * sizeof(char *));
+        check_malloc(tasks[i].files, "error to alocate memory to filenames array.");
+
+        for (int j = 0; j < num_files; j++) {
+            tasks[i].files[j] = filenames[file_index++];
         }
     }
+
+    return tasks;
 }
 
-void extract_file_names_from_argv(char ** filesnames, char ** argv, int argc){
-    for (int i = 0; i < argc; i++){
-        if (i > 1 && i < argc - 2){
-            strcpy(filesnames[i - 2], argv[i]);
+t_array * merge_intermediate_vectors(t_reader_threads_args * args, size_t threads_count){
+    t_array * result = (t_array *)malloc(sizeof(t_array));
+    result->size = 0;
+    for (size_t i = 0; i < threads_count; i++) {
+        result->size += args[i].intermediate_array->size;
+    }
+
+    int * merged = (int *) malloc(sizeof(int) * result->size);
+    check_malloc(merged, "error to allocate unifed array");
+    
+    size_t pos = 0;
+    for (size_t i = 0; i < threads_count; i++) {
+        t_array *res = args[i].intermediate_array;
+        for (size_t j = 0; j < res->size; j++) {
+            merged[pos++] = res->array[j];
         }
     }
+
+    result->array = merged;
+    return result;
 }
 
-void fill_args_vector(int n_threads, int distribution[], char * filenames[], t_read_args args[]){
-    int k = 0, j = 0;
-    for (int i = 0; i < n_threads; i++) {
-        args[i].filenames = string_vector_allocation(distribution[i], 30);
-        args[i].n_files = distribution[i];
-
-        // popula o vetor de argumentos respeitando a distribuição dos arquivos
-        // se o vetor de distribuição for [1, 1, 1, 0]
-        // Então os argumentos serão
-        // args[0].filenames = {"arq1.dat"}
-        // args[1].filenames = {"arq1.dat"}
-        // args[2].filenames = {"arq1.dat"}
-        // args[3].filenames = {}
-        while (j < distribution[i]) {
-            strcpy(args[i].filenames[j], filenames[k]);
-            k++;
-            j++;
-        }
-        j = 0;
+void print_array(int * array, size_t size){
+    for (size_t i = 0; i < size; i++){
+        printf("%d -> ", array[i]);
     }
+    printf("\n");
 }
 
-int countFileLines(char * filename){
-    FILE * file;
-    file = fopen(filename, "r");
-    if (file == NULL){
-        printf("erro: erro ao abrir o arquivo de para contar linhas\n");
-        exit(EXIT_FAILURE);
+void show_execution_details(size_t threads_count, t_sort_outcome * sort_result){
+    double threads_total_time = 0.0;
+    int integers_processed = 0;
+    for (size_t i = 0; i < threads_count; i++){
+        threads_total_time += sort_result->threads_outcome[i].execution_time;
+        integers_processed += sort_result->threads_outcome[i].intermediate_array->size;
     }
-    int c = 0;
-    char ch;
+    printf("======== Results =========\n");
 
-    while ((ch = getc(file)) != EOF){
-        if (ch == '\n'){ c++; }
-    }
+    printf("Total of integers processed: %d\n", integers_processed);
 
-    fclose(file);
+    char *group_time_str = format_time_auto(sort_result->execution_time);
+    printf("Threads group time (create until join): %s\n", group_time_str);
+    free(group_time_str);
 
-    return c;
-}
+    char *total_sort_time_str = format_time_auto(threads_total_time);
+    printf("Threads total time to sort: %s\n", total_sort_time_str);
+    free(total_sort_time_str);
 
-void merge_vectors(int mergedVectorSize, int n_threads, t_read_args * args, int * mergedVector, int * distribution){
-    int pos = 0;
-    for (int i = 0; i < n_threads; i++){
-        if (distribution[i] > 0){
-            memcpy(mergedVector + pos, args[i].vector, args[i].vector_size * sizeof(int));
-            pos += args[i].vector_size;
-        }
+    for (size_t i = 0; i < threads_count; i++){
+        char *thread_time_str = format_time_auto(sort_result->threads_outcome[i].execution_time);
+        printf("Thread (%ld): %s\n", i + 1, thread_time_str);
+        free(thread_time_str);
     }
 }

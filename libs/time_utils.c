@@ -1,18 +1,27 @@
-#include <time.h>
 #include <stdio.h>
+#include <time.h>
 #include "time_utils.h"
-#include "types.h"
 
-double compute_execution_time(struct timespec begin_time, struct timespec end_time) {
-    double totalExecutionTime;
-    totalExecutionTime = (end_time.tv_sec - begin_time.tv_sec);
-    totalExecutionTime += (end_time.tv_nsec - begin_time.tv_nsec) / 10e9;
-    return totalExecutionTime;
+double get_elapsed_time_in_seconds(struct timespec begin, struct timespec end) {
+    return (end.tv_sec - begin.tv_sec) + (end.tv_nsec - begin.tv_nsec) / 1e9;
 }
 
-void show_time_specs(int n_threads, struct timespec begin_time, struct timespec end_time, t_sort_args * ordened_vectors) {
-    for (int i = 0; i < n_threads; i++){
-        printf("Tempo de execução do Thread %d: %lf segundos.\n", i, ordened_vectors[i].execution_time);
+char* format_time_auto(double seconds) {
+    char *buffer = malloc(50);  // espaço suficiente para a string
+    if (!buffer) {
+        perror("malloc failed");
+        exit(EXIT_FAILURE);
     }
-    printf("Tempo total de execução: %lf segundos.\n", compute_execution_time(begin_time, end_time));
+
+    if (seconds >= 1.0) {
+        sprintf(buffer, "%.6f s", seconds);
+    } else if (seconds >= 1e-3) {
+        sprintf(buffer, "%.3f ms", seconds * 1e3);
+    } else if (seconds >= 1e-6) {
+        sprintf(buffer, "%.3f µs", seconds * 1e6);
+    } else {
+        sprintf(buffer, "%.3f ns", seconds * 1e9);
+    }
+
+    return buffer;
 }

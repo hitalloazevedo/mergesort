@@ -1,12 +1,12 @@
 # Nome do executável
-EXEC = mergesort
+EXEC = main
 
 # Diretórios
 SRC_DIR = .
 LIB_DIR = ./libs
 
 # Arquivos principais
-MAIN_SRC = $(SRC_DIR)/mergesort.c
+MAIN_SRC = $(SRC_DIR)/main.c
 
 # Busca por todos os arquivos .c na pasta libs
 LIB_SRCS = $(wildcard $(LIB_DIR)/*.c)

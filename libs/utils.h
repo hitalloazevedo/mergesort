@@ -1,4 +1,5 @@
 #include "types.h"
+#include <stdlib.h>
 
 // Para T threads e A arquivos, retorna um vetor com a distribuição das tarefas
 // int tasks: quantidade total de arquivos a serem lidos
@@ -6,24 +7,18 @@
 // int distribution[]: vetor de inteiros que armazenará a distribuição
 // Exemplo: T=4 A=3 distribution=[1, 1, 1, 0]
 // Exemplo: T=4 A=5 distribution=[2, 1, 1, 1]
-void tasks_distributor(int tasks, int executors, int distribution[]);
+t_reader_thread_task * tasks_distributor_for_reader_threads(int threads_count, int files_count, char **filenames);
 
 // Extrai apenas os nomes dos arquivos de entradas da lista de argumentos
 // E guarda no vetor de strings filenames
 // char ** filenames: Vetor de strings onde será guardado o nome dos arquivos
 // char ** argv: Vetor de strings com os argumentos do programa
 // int argc: quantidade de argumentos do vetor argv
-void extract_file_names_from_argv(char ** filenames, char ** argv, int argc);
 
-// Preenche o vetor de argumentos que será utilizando dentro da thread com os
-// nomes dos arquivos que cada thread irá ler
-void fill_args_vector(int n_threads, int distribution[], char * filenames[], t_read_args args[]);
 
 // Imprime um vetor no terminal
-void showVector(int * vet, int size);
-
-// Retorna o número de linhas que um arquivo tem
-int countFileLines(char * filename);
+void print_array(int * array, size_t size);
 
 // Realiza o merge dos vetores não ordenados que são gerados após a leitura dos arquivos
-void merge_vectors(int mergedVectorSize, int n_threads, t_read_args * args, int * mergedVector, int * distribution);
+t_array * merge_intermediate_vectors(t_reader_threads_args * args, size_t threads_count);
+void show_execution_details(size_t threads_count, t_sort_outcome * sort_result);
