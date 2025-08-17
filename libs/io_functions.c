@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
 #include "types.h"
 #include <limits.h>
 #include <time.h>
@@ -93,7 +94,11 @@ void * read_multiple_input_files(void * args) {
 
         
         FILE * fp = fopen(file_path, "r");
-        check_malloc(fp, "error to open file");
+        printf("%s\n", file_path);
+        if (fp == NULL){
+            fprintf(stderr, "%s '%s': %s\n", "error to alocate memory", file_path, strerror(errno));
+            exit(EXIT_FAILURE);
+        }
         free(file_path);
 
         int num;
